@@ -13,3 +13,6 @@ src/*.o
 src/*.so
 src/*.dll
 src/*.dylib
+
+.DS_Store
+example_data/
