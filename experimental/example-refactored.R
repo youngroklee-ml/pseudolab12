@@ -16,6 +16,26 @@ tab <- read.csv(
 # Step: Cloning
 #########################
 
+#' Duplicate data frame for each treatment arm to emulate
+#'
+#' @param data Input data frame that contains all observations of interest.
+#'   Each row represents an observation, and columns include
+#'   observation identifiers, binary treatment variable (0/1),
+#'   time to treatement (continuous), binary outcome variable (0/1),
+#'   observed followup time (continuous), and covariates.
+#' @param arms Character vector that each element represents each arm's name.
+#'
+#' @returns A list of data frame.
+#'   Each element of list is associated with each arm.
+#'
+#' @export
+#' @examples
+#' tab <- read.csv(
+#'   "example_data/ije-2019-08-1035-File008.csv",
+#'   sep = ",",
+#'   header = TRUE
+#' )
+#' clones <- clone_arms(tab, c("Control", "Surgery"))
 clone_arms <- function(data, arms) {
   n <- length(arms)
   if (n <= 1) {
@@ -63,7 +83,21 @@ apply_policy_old <- function(
   res
 }
 
-# apply case_when logics (e.g. policy, censoring) to clones
+#' Apply case_when logics (e.g. policy, censoring) to clones
+#'
+#' @param clones A list of data frame. Each element of the list represents
+#'   each treatment arm.
+#' @param logics A nested list. Each element of outer list represents each
+#'   treatment arm. Each element of inner list represents each new variable
+#'   to be created by applying logics. Each element of inner list containts a
+#'   character vector that represents a sequence of logics to be passed into
+#'   `case_when()` call to determine a value of the new variable.
+#'
+#' @returns A list of data frame that each data frame include new variables
+#'   created by the provided logics.
+#'
+#' @export
+#' @examples
 apply_logics <- function(
   clones,
   logics
@@ -96,8 +130,52 @@ apply_logics <- function(
 }
 
 
-# create clone policy for scenario A
-# return as a nested list
+#' Generate clone policy for scenario A
+#'
+#' @param arms A character vector of length 2. The first element represents
+#'   a name of the untreated arm, and the second element represents a name of
+#'   the treated arm.
+#' @param treatment A name of variable that represents whether each observation
+#'   was treated or not in observational data. The treatment variable should
+#'   exists in data frame that the return value of this function will be
+#'   applied, and the treatment variable value in the data frame should be
+#'   either 0 and 1, i.e. binary treatment.
+#' @param time_to_treatment A name of variable that represent time to
+#'   treatment in the observational data. The time-to-treatment variable should
+#'   exists in data frame that the return value of this function will be
+#'   applied, and the value in the data frame should be either numeric value
+#'   or NA if the observation was untreated in the observational data.
+#' @param grace_period A numeric value to represent grace period of treatment.
+#'   Treatment policy is assumed to be "provide treatment within the grace
+#'   period."
+#' @param outcome A name of variable that represent outcome in the
+#'   observational data. The outcome variable should exists in data frame that
+#'   the return value of this function will be applied, and the outcome
+#'   variable value in the data frame should be either 0 and 1, i.e. binary
+#'   outcome.
+#' @param followup A name of variable that represent follow up time in the
+#'   observational data. The follow up time variable should exists in data
+#'   frame that the return value of this function will be applied, and the
+#'   follow up time variable value in the data frame should be numeric.
+#' @param clone_outcome A name of variable to be newly created to represent
+#'   emulated outcome in cloned data frame. The new variable name should not
+#'   already exist in the data frame that the return value of this function
+#'   will be applied, to avoid accidental overwriting.
+#' @param clone_followup A name of variable to be newly created to represent
+#'   emulated follow up time in cloned data frame. The new variable name should
+#'   not already exist in the data frame that the return value of this function
+#'   will be applied, to avoid accidental overwriting.
+#'
+#' @returns A nested list. The first element of the outer list represents
+#'   untreated arm, while the second element of the outer list represents
+#'   treated arm. For each element of outer list, the first element of the inner
+#'   list represents emulated outcome, and the second element of the inner list
+#'   represents emulated follow up time. Each element of the inner list
+#'   represents a sequence of logics to be passed into `case_when()` when
+#'   creating new variables for emulated outcome and follow up time.
+#'
+#' @export
+#' @examples
 create_policy_A <- function(
   arms,
   treatment,
@@ -239,8 +317,54 @@ censor_arms_old <- function(
   res
 }
 
-# create censoring logic for scenario A
-# return as a nested list
+#' Generate censoring logic for scenario A
+#'
+#' @param arms A character vector of length 2. The first element represents
+#'   a name of the untreated arm, and the second element represents a name of
+#'   the treated arm.
+#' @param treatment A name of variable that represents whether each observation
+#'   was treated or not in observational data. The treatment variable should
+#'   exists in data frame that the return value of this function will be
+#'   applied, and the treatment variable value in the data frame should be
+#'   either 0 and 1, i.e. binary treatment.
+#' @param time_to_treatment A name of variable that represent time to
+#'   treatment in the observational data. The time-to-treatment variable should
+#'   exists in data frame that the return value of this function will be
+#'   applied, and the value in the data frame should be either numeric value
+#'   or NA if the observation was untreated in the observational data.
+#' @param grace_period A numeric value to represent grace period of treatment.
+#'   Treatment policy is assumed to be "provide treatment within the grace
+#'   period."
+#' @param followup A name of variable that represent follow up time in the
+#'   observational data. The follow up time variable should exists in data
+#'   frame that the return value of this function will be applied, and the
+#'   follow up time variable value in the data frame should be numeric.
+#' @param clone_censoring A name of binary indicator variable to be newly
+#'   created to represent whether the observation violates arm's policy or not.
+#'   The new variable name should not already exist in the data frame that the
+#'   return value of this function will be applied, to avoid accidental
+#'   overwriting.
+#' @param clone_uncensored_followup A name of variable to be newly created to
+#'   represent the earliest time that the value of the emulated censoring binary
+#'   indicator (i.e. variable to be named according to `clone_censoring`
+#'   argument) value can be determined for each observation. The new variable
+#'   name should not already exist in the data frame that the return value of
+#'   this function will be applied, to avoid accidental overwriting.
+#'
+#' @returns A nested list. The first element of the outer list represents
+#'   untreated arm, while the second element of the outer list represents
+#'   treated arm. For each element of outer list, the first element of the inner
+#'   list represents emulated censoring binary indicator (0/1) that represents
+#'   whether the observation violated the arm's policy or not within the grace
+#'   period, and the second. The second element of the inner list represents
+#'   the earliest time that the value of the emulated censoring binary
+#'   indicator can be determined for each observation. Each element of the
+#'   inner list represents a sequence of logics to be passed into `case_when()`
+#'   when creating new variables for emulated censoring indicator and censoring
+#'   time.
+#'
+#' @export
+#' @examples
 create_censoring_logics_A <- function(
   arms,
   treatment,
@@ -376,7 +500,22 @@ create_timestamp_table_old <- function(clones) {
   res
 }
 
-# create timestamp table
+#' Create timestamp table
+#'
+#' @param clones A list of data frame. Each element of the list represents
+#'   each treatment arm. This version of clones must contain a column that
+#'   represents a emulated follow up time.
+#' @param clone_followup A column name in emulcated clone (i.e. `clones`)
+#'   that represents the emulated follow up time in cloned data frame.
+#'
+#' @returns A data frame with two columns: `tevent` and `ID_t`.
+#'   `tevent` represents a timestamp that outcome event can occur based on
+#'   observed data. `ID_t` represents an enumerated identifier of each
+#'   timestamp, from 1 to n where n represents the number of unique `tevent`
+#'   value.
+#'
+#' @export
+#' @examples
 create_timestamp_table <- function(clones, clone_followup) {
   timestamps <- sapply(clones, `[[`, i = clone_followup, simplify = FALSE)
   t_events <- sort(unique(unlist(timestamps)))
@@ -407,14 +546,39 @@ split_at_timestamp_old <- function(clones, t_events, event) {
   res
 }
 
-# split data at each time event
+#' Split each observation into multiple subrecords at each time cut
+#'
+#' @param clones A list of data frame. Each element of the list represents
+#'   each treatment arm. This version of clones must contain a column that
+#'   represents a emulated follow up time (corresponding to `clone_followup`
+#'   argument) and an event of interest (corresponding to `event` argument).
+#' @param clone_followup A column name in emulcated clone (i.e. `clones`)
+#'   that represents the emulated follow up time in cloned data frame.
+#' @param t_events A vector of timestamp that outcome event can occur based on
+#'   observed data.
+#' @param event A variable name of an event of interest. The variable should
+#'   exists in each data frame that is an element of `clones` argument, and
+#'   the variable value should be a binary (0 or 1).
+#' @param timestamp_start A new variable name to denote start time.
+#' @param id A new variable name for a unique observation identifier, to
+#'   represents that multiple rows in output data frame is associated with the
+#'   same observation.
+#'
+#' @returns A list of long-form data frames. Each data frame represents each
+#'   clone arm. Each row of the long-form data frame represents a subrecord of
+#'   each observation associated with each specific time interval. The first
+#'   subrecord starts with time 0, and the rows are expanded up to
+#'   `clone_followup`, where cut times are determined by `t_events` argument.
+#'
+#' @export
+#' @examples
 split_at_timestamp <- function(
   clones,
   clone_followup,
   t_events,
   event,
   timestamp_start = "Tstart",
-  timestamp_id = "ID"
+  id = "ID"
 ) {
   arms <- names(clones)
 
@@ -428,12 +592,32 @@ split_at_timestamp <- function(
         end = clone_followup,
         start = timestamp_start,
         event = event,
-        id = timestamp_id
+        id = id
       )
   }
 
   res
 }
+
+df_timestamp <- create_timestamp_table(clones_censored, "fup")
+
+clones_splitted_by_outcome <- split_at_timestamp(
+  clones_censored,
+  "fup",
+  df_timestamp$tevent,
+  "outcome",
+  "Tstart",
+  "ID"
+)
+
+clones_splitted_by_censoring <- split_at_timestamp(
+  clones_censored,
+  "fup",
+  df_timestamp$tevent,
+  "censoring",
+  "Tstart",
+  "ID"
+)
 
 
 # Function to create training data for censoring probability estimation
@@ -482,7 +666,43 @@ create_final_data_old <- function(clones) {
   res
 }
 
-# Function to create training data for censoring probability estimation
+#' Create training data for censoring probability estimation
+#'
+#' @param clones A list of data frame. Each element of the list represents
+#'   each treatment arm. This version of clones must contain a column that
+#'   represents an emulated follow up time (corresponding to `clone_followup`
+#'   argument), an emulated outcome (correspodning to `clone_outcome`), and a
+#'   binary indicator variable that represents whether the observation violates
+#'   arm's policy or not (corresponding to `clone_censoring` argument).
+#' @param clone_followup A column name that represents the emulated follow up
+#'   time in each arm of clones. The variable should exists in each element
+#'   data frame of `clones` argument.
+#' @param clone_outcome A column name that represents the emulated outcome
+#'   in each arm of clones. The variable should exists in each element
+#'   data frame of `clones` argument, and the variable value should be binary
+#'   (0 or 1).
+#' @param clone_censoring A column name that represent whether the observation
+#'   violates arm's policy or not. The variable should exists in each element
+#'   data frame of `clones` argument, and the variable value should be binary
+#'   (0 or 1).
+#' @param col_ids A vector of column names that a combination of their values
+#'   uniquely identifies each observation.
+#' @param timestamp_start A new variable name to denote start time of each
+#'   subrecord of observations in a long-form data.
+#' @param id A new variable name for a unique observation identifier, to
+#'   represents that multiple rows in output data frame is associated with the
+#'   same observation.
+#' @param timestamp_stop A new variable name to denote end time of each
+#'   subrecord of observations in a long-form data.
+#'
+#' @returns A list of long-form data frames. Each data frame represents each
+#'   clone arm. Each row of the long-form data frame represents a subrecord of
+#'   each observation associated with each specific time interval. The first
+#'   subrecord starts with time 0, and the rows are expanded up to
+#'   `clone_followup`, where cut times are determined by `t_events` argument.
+#'
+#' @export
+#' @examples
 create_final_data <- function(
   clones,
   clone_followup,
@@ -490,7 +710,7 @@ create_final_data <- function(
   clone_censoring,
   col_ids,
   timestamp_start = "Tstart",
-  timestamp_id = "ID",
+  id = "ID",
   timestamp_stop = "Tstop"
 ) {
   df_timestamp <- create_timestamp_table(clones, clone_followup)
@@ -501,7 +721,7 @@ create_final_data <- function(
     df_timestamp$tevent,
     clone_outcome,
     timestamp_start,
-    timestamp_id
+    id
   )
 
   clones_splitted_by_censoring <- split_at_timestamp(
@@ -510,7 +730,7 @@ create_final_data <- function(
     df_timestamp$tevent,
     clone_censoring,
     timestamp_start,
-    timestamp_id
+    id
   )
 
   # merge two tables and create column to represent end of timestamp
