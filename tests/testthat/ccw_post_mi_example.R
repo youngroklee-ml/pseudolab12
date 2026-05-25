@@ -2797,3 +2797,18 @@ res_once$support$weighted_day30_diagnostics
 # res_once$support$weighted_day30_diagnostics
 # subset(res_once$risk_summary, method == "ccw_weighted")
 # subset(res_once$contrast_summary, method == "ccw_weighted")
+
+
+# cloning 하는 step
+# Propensity score 구하는 step
+# inverse probability of censoring weight (IPCW)
+# 1/ps_i, ps_i는 propensity score (censoring 되지 않을 확률)
+# propensity score 구하는 방법론이 많아서 어떻게 구할 것인가
+# Weight를 구하는 step
+# IPCW = 1/ps_i 
+# STABILIZED WEIGHT =  numerator / denominator
+# STABILIZED WEIGHT[i-1]*STABILIZED WEIGHT[i]
+# id day가 여러번 측정
+
+# IPCW example function code  - 백지현 / 양혜원 / 이영록 logistic regression
+# Case review - 정동훈 / 박상호 (Censoring indicator / weight)
