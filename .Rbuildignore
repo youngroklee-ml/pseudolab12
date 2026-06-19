@@ -6,3 +6,4 @@
 ^renv$
 ^renv/
 ^renv\.lock$
+^data-raw$
