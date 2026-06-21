@@ -9,7 +9,12 @@
 Provides a starter package for clone-censor-weighting workflows used in target trial emulation. The package currently includes data ingestion helpers, a minimal data cloning routine, and utilities for constructing survival responses.
 }
 \author{
-\strong{Maintainer}: Sangho Park \email{shstat1729@gmail.com}
+\strong{Maintainer}: Sang Ho Park \email{shstat1729@gmail.com}
+
+Authors:
+\itemize{
+  \item Sang Ho Park \email{shstat1729@gmail.com}
+}
 
 }
 \keyword{internal}
