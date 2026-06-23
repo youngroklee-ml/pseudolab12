@@ -3,7 +3,7 @@
 \docType{data}
 \name{lungcancer}
 \alias{lungcancer}
-\title{Simulated lung cancer patients data by Mirange et al. (2020)}
+\title{Simulated lung cancer patients data by Maringe et al. (2020)}
 \format{
 \subsection{\code{lungcancer}}{
 
@@ -31,7 +31,7 @@ A data frame with 200 rows and 12 columns:
 lungcancer
 }
 \description{
-The dataset is from supplmentary files of \href{https://doi.org/10.1093/ije/dyaa057}{Mirange et al. (2020)}.
+The dataset is from supplmentary files of \href{https://doi.org/10.1093/ije/dyaa057}{Maringe et al. (2020)}.
 The dataset is a set of 200 simulated lung cancer patients.
 These patients are followed up for a year following their cancer diagnosis:
 106 of them received surgery within six months of their diagnosis and

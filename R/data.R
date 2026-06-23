@@ -1,6 +1,6 @@
-#' Simulated lung cancer patients data by Mirange et al. (2020)
+#' Simulated lung cancer patients data by Maringe et al. (2020)
 #'
-#' The dataset is from supplmentary files of [Mirange et al. (2020)](https://doi.org/10.1093/ije/dyaa057).
+#' The dataset is from supplmentary files of [Maringe et al. (2020)](https://doi.org/10.1093/ije/dyaa057).
 #' The dataset is a set of 200 simulated lung cancer patients. 
 #' These patients are followed up for a year following their cancer diagnosis:
 #' 106 of them received surgery within six months of their diagnosis and 
